@@ -1,39 +1,33 @@
-import Map as mp
 import numpy as np
-from enum import Enum
-
-class Direction(Enum):
-    RIGHT = 0
-    DOWN = 1
-    LEFT = 2
-    UP = 3
-    DOWN_RIGHT = 4
-    DOWN_LEFT = 5
-    UP_LEFT = 6
-    UP_RIGHT = 7
-
-    def __str__(self):
-        if self.value == 0:
-            return str('RIGHT')
-        if self.value == 1:
-            return str('DOWN')
-        if self.value == 2:
-            return str('LEFT')
-        if self.value == 3:
-            return str('UP')
-        return str()
 
 class Node():
-    def __init__(self, edges):
-        self.edges: list[Edge] = edges
+    pass
+class Edge():
+    pass
+class Zone():
+    pass
+
+class Node():
+    def __init__(self, name: str):
+        self.name = name
+        self.edges: list[Edge] = list()
 
 class Edge():
-    def __init__(self,name: str, node1: Node, node2: Node, zoneLeft: Zone, zoneRight: Zone):
-        self.name = name
+    def __init__(self, node1: Node, node2: Node, sideZone1: Zone = None, sideZone2: Zone = None):
         self.node1 = node1
         self.node2 = node2
-        self.zoneLeft = zoneLeft
-        self.zoneRight = zoneRight
+        self.sideZone1 = sideZone1
+        self.sideZone2 = sideZone2
+
+    def __str__(self):
+        s: str = str()
+        s += "Edge has nodes connected: "+self.node1.name+" and "+self.node2.name+"\n"
+        s += "\t zones connected: "
+        if self.sideZone1 is not None:
+            s+=self.sideZone1.zType+", "
+        if self.sideZone2 is not None:
+            s+=self.sideZone2.zType
+        return s
 
 
 class Zone():
@@ -41,132 +35,94 @@ class Zone():
         self.x = x
         self.y = y
         self.zType = zType
-        self.ulNode: Edge = None
-        self.urNode: Edge = None
-        self.drNode: Edge = None
-        self.dlNode: Edge = None
+        self.ulNode: Node = None
+        self.urNode: Node = None
+        self.drNode: Node = None
+        self.dlNode: Node = None
 
 class Map:
-    def __init__(self, row = 3, column = 4, gridData =  [['q', 'v', 'p', ' '],['v', ' ', 'q', ' '], ['p', 'q', 'v', 'v']]):
-        self.row = row
-        self.column = column
-        self.zones = list()
+    # q = quarentine place, v = vaccinated place, p = playground, e = empty
+    def __init__(self, rows: int = 3, columns: int = 4, gridData =  [['q', 'v', 'p', 'e'],['v', 'e', 'q', 'e'], ['p', 'q', 'v', 'v']]):
+        self.rows = rows
+        self.columns = columns
+        self.zones = list(list())
+        self.edgeList: list[Edge] = list()
 
-        # Generate the grid of zones
+        # Generate the zones grid
         for i in range(len(gridData)):
             self.zones.append(list())
             for j in range(len(gridData[i])):
                 self.zones[i].append(Zone(j, i, gridData[i][j]))
-            self.zones[i] = np.array(self.zones[i])
-        self.zones = np.array(self.zones)
 
-        # Generate the edges
-        edges = list(list())
+        # Generate the Nodes
         x = 65
-        for i in range(row+1):
-            edges.append(list())
-            for j in range(column+1):
-                edge = Edge(chr(x), i, j)
-                edges[i].append(edge)
+        nodes = list(list())
+        for i in range(self.rows+1):
+            nodes.append(list())
+            for j in range(self.columns+1):
+                nodes[i].append(Node(chr(x)))
                 x+=1
 
-        # Now to set the zone to edge relationships
+        # Setting each node corresponding to the zone
         zone: Zone
-        edge: Edge
-        for i in range(len(self.zones)):
-            for j in range(len(self.zones[i])):
+        for i in range(self.rows):
+            for j in range(self.columns):
                 zone = self.zones[i][j]
-                # First et the upperleft edge
-                edge = edges[i][j]
-                zone.ulEdge = edge
-                edge.drZone = zone
-                # Next Set the upperright edge
-                edge = edges[i][j+1]
-                zone.urEdge = edge
-                edge.dlZone = zone
-                # Next the downright edge
-                edge = edges[i+1][j+1]
-                zone.drEdge = edge
-                edge.ulZone = zone
-                # Finally the downleft edge
-                edge = edges[i+1][j]
-                zone.dlEdge = edge
-                edge.urZone = zone
+                zone.ulNode = nodes[i][j]
+                zone.urNode = nodes[i][j+1]
+                zone.dlNode = nodes[i+1][j]
+                zone.drNode = nodes[i+1][j+1]
+                if j == 0:
+                    edge = Edge(nodes[i][j], nodes[i+1][j], None, self.zones[i][j])
+                    self.edgeList.append(edge)
+                else:
+                    edge = Edge(nodes[i][j], nodes[i+1][j], self.zones[i][j-1], self.zones[i][j])
+                    self.edgeList.append(edge)
+                if i == 0:
+                    edge = Edge(nodes[i][j], nodes[i][j+1], None, self.zones[i][j])
+                    self.edgeList.append(edge)
+                else:
+                    edge = Edge(nodes[i][j], nodes[i][j+1], self.zones[i-1][j], self.zones[i][j])
+                    self.edgeList.append(edge)
+            edge = Edge(nodes[i][self.columns], nodes[i+1][self.columns], self.zones[i][self.columns-1], None)
+            self.edgeList.append(edge)
+        for j in range(self.columns):
+            edge = Edge(nodes[self.rows][j], nodes[self.rows][j+1], self.zones[self.rows-1][j], None)
+            self.edgeList.append(edge)
 
-
-    def __str__(self):
-        zone: Zone
-        edge: Edge
-        s: str = str("Here is your map: \n")
-        for i in range(self.row):
-            for j in range(self.column):
-                s+=str(self.zones[i][j].ulEdge.name)+"\t\t"
-            s+=self.zones[i][j].urEdge.name+"\n"
-            s+="\n\t"
-            for j in range(self.column):
-                s+="*"+self.zones[i][j].zType+"*\t\t"
-            s+="\n\n"
-        for j in range(self.column):
-            s+=self.zones[i][j].dlEdge.name+"\t\t"
-        s+=self.zones[self.row-1][self.column-1].drEdge.name
-        return s
-
-
-def CalcCostC(start: Edge, dir: Direction):
-    cost = 0.0
-    left = None
-    right = None
-    if dir == Direction.RIGHT:
-        if start.urZone is not None:
-            left = start.urZone.zType
-        if start.drZone is not None:
-            right = start.drZone.zType
-    if dir == Direction.DOWN:
-        if start.dlZone is not None:
-            left = start.dlZone.zType
-        if start.drZone is not None:
-            right = start.drZone.zType
-    if dir == Direction.LEFT:
-        if start.dlZone is not None:
-            left = start.dlZone.zType
-        if start.urZone is not None:
-            right = start.urZone.zType
-    if dir == Direction.UP:
-        if start.ulZone is not None:
-            left = start.ulZone.zType
-        if start.urZone is not None:
-            right = start.urZone.zType
-    switcher = {
-        'q': 0,
-        'v': 2,
-        'p': 3,
-        ' ': 1}
-    if left is not None and right is not None:
-        cost = (switcher.get(left) + switcher.get(right))*0.5
-    elif left is not None:
-        cost = switcher.get(left)
-    elif right is not None:
-        cost = switcher.get(right)
-    return cost
-    
-
+        # Now setting the node lists, unoptimal method and will improve later
+        e: Edge
+        n: Node
+        for nodeList in nodes:
+            for n in nodeList:
+                for e in self.edgeList:
+                    if n == e.node1 or n == e.node2:
+                        n.edges.append(e)
 
 
 def main():
-   # mp.printMap()
-    map = Map()  
-    print(map)
-    for x in map.zones:
-        for y in x:
-            print(y)
-
-    #print("edges equal? : "+str(z1.urEdge == z2.urEdge))
-    print("A->B: "+str(CalcCostC(map.zones[0][0].ulEdge, Direction.RIGHT)))
-    print("B->C: "+str(CalcCostC(map.zones[0][1].ulEdge, Direction.RIGHT)))
-    print("C->D: "+str(CalcCostC(map.zones[0][2].ulEdge, Direction.RIGHT)))
-    print("D->E: "+str(CalcCostC(map.zones[0][3].ulEdge, Direction.RIGHT)))
-    print("B->G: "+str(CalcCostC(map.zones[0][1].ulEdge, Direction.DOWN)))
-    print("C->H: "+str(CalcCostC(map.zones[0][2].ulEdge, Direction.DOWN)))
+    edge: Edge
+    map = Map()
+    z: Zone
+    e: Edge
+    n: Node
+    for i in range(len(map.zones)):
+        for j in range(len(map.zones[i])):
+            z = map.zones[i][j]
+            print("Zone "+str(z.x)+","+str(z.y))
+            print("Upper left node: "+z.ulNode.name+" has edges: ")
+            for e in z.ulNode.edges:
+                print(e)
+            print("Upper Right node: "+z.urNode.name+" has edges: ")
+            for e in z.urNode.edges:
+                print(e)
+            print("Down left node: "+z.dlNode.name+" has edges: ")
+            for e in z.dlNode.edges:
+                print(e)
+            print("Down Right node: "+z.drNode.name+" has edges: ")
+            for e in z.drNode.edges:
+                print(e)
+            print("*************************NEXT ZONE****************************")
 
 
 
