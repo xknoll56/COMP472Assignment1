@@ -18,11 +18,33 @@ class AStarAlgorithm():
     def priority_queue_push(self, node: Node, f_value):
         self.counter += 1
         heapq.heappush(self.openList, [f_value, self.counter, node])
-    def priority_quene_pop(self):
+    def priority_queue_pop(self):
         [f_value, counter, node] = heapq.heappop(self.openList)
         print("Poping "+node.name+" f_value: "+str(f_value))
         return node
 
+class CovidPatienAStarAlgorithm(AStarAlgorithm):
+
+    def generate_path(self, start_node: Node, end_node: Node):
+
+        # set initial nodes
+        start: Node = start_node
+        cur: Node = start
+        targ: Node = end_node
+
+        # set initial values
+        cur.g_value = 0.0
+        cur.f_value = self.get_heuristic_estimate(cur, targ)
+        self.priority_queue_push(cur, cur.f_value)
+
+        # loop through neighnours
+        while len(self.openList) > 0:
+            cur = self.priority_queue_pop()
+
+
+
+
+    print("Not Completed")
 
 
 class VaccinatedAStarAlgorithm(AStarAlgorithm):
@@ -35,7 +57,7 @@ class VaccinatedAStarAlgorithm(AStarAlgorithm):
         cur.f_value = self.get_heuristic_estimate(cur, targ)
         self.priority_queue_push(cur, cur.f_value)
         while len(self.openList)>0:
-            cur = self.priority_quene_pop()
+            cur = self.priority_queue_pop()
 
             if cur == targ:
                 print("Found target")
