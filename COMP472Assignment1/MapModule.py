@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum
+import random
 
 class Node():
     pass
@@ -13,14 +14,51 @@ class Diagonal(Enum):
     DOWN_RIGHT = 1
     DOWN_LEFT = 2
     UP_LEFT = 3
+    NONE = 4
+
+
+class Cardinal(Enum):
+    UP = 0
+    RIGHT = 1
+    DOWN = 2
+    LEFT = 3
+    NONE = 4
+
+class Direction():
+    def __init__(self, diag: Diagonal  = Diagonal.NONE, cardinal: Cardinal = Cardinal.NONE):
+        self.diag = diag
+        self.cardinal = cardinal
+    
 
 class Node():
+
+    class CardinalConnection():
+        def __init__(self, node: Node, edge: Edge):
+            self.node = node
+            self.edge = edge
+    # e00 and e01 represent 1 path to the diagonal while e10 and e11 represent
+    # the alternative path
+    class DiagonalConnection():
+        def __init__(self, node: Node, e00: Edge, e01: Edge, e10: Edge, e11: Edge):
+            self.node = node
+            self.e00 = e00
+            self.e01 = e01
+            self.e10 = e10
+            self.e11 = e11
+            
     def __init__(self, name: str, x:int, y:int):
         self.name: str = name
         self.x = x
         self.y = y
+
+
         #A list of all cardinal edges
         self.edges: list[Edge] = list()
+        #A list of all the cardinal nodes
+        self.cardinals :dict = dict()
+        #A list of all the diagonals nodes
+        self.diags: dict = dict()
+
         #Edge to the Right
         self.right_edge: Edge = None
         #Edge to Downward
@@ -29,7 +67,44 @@ class Node():
         self.left_edge: Edge = None
         #Edge to Upward
         self.up_edge: Edge = None
+        #To be used to find the path once the target is found
         self.prevNode: Node = None
+        #To be used to for transition
+        self.next: Node = None
+
+        self.upper_node: Node = None
+        self.upper_right_node: Node = None
+        self.right_node: Node = None
+        self.lower_right_node:Node = None
+        self.lower_node: Node = None
+        self.lower_left_node: Node = None
+        self.left_node: Node = None
+        self.upper_left_node: Node = None
+
+        self.g_value: float = float('inf')
+        self.f_value: float = float('inf')
+
+    
+
+    #cardinals will be checked by all the patients
+    def has_right_edge(self):
+        return self.right_edge != None
+    def has_left_edge(self):
+        return self.left_edge != None
+    def has_upper_edge(self):
+        return self.up_edge != None
+    def has_lower_edge(self):
+        return self.down_edge != None
+
+    #diagonal checks will be used for the vaccinated patient 
+    def has_upper_right_edge(self):
+        return self.has_right_edge() and self.has_upper_edge()
+    def has_upper_left_edge(self):
+        return self.has_upper_edge() and self.has_left_edge()
+    def has_lower_left_edge(self):
+        return self.has_lower_edge() and self.has_left_edge()
+    def has_lower_right_edge(self):
+        return self.has_lower_edge() and self.has_right_edge()
 
 class Edge():
     def __init__(self, node1: Node, node2: Node, side_zone_1: Zone = None, side_zone_2: Zone = None):
@@ -84,11 +159,11 @@ class Map:
 
         # Generate the Nodes
         x = 65
-        nodes = list(list())
+        self.nodes = list(list())
         for i in range(self.rows+1):
-            nodes.append(list())
+            self.nodes.append(list())
             for j in range(self.columns+1):
-                nodes[i].append(Node(chr(x), j, i))
+                self.nodes[i].append(Node(chr(x), j, i))
                 x+=1
 
         # Setting each node corresponding to the zone
@@ -96,27 +171,27 @@ class Map:
         for i in range(self.rows):
             for j in range(self.columns):
                 zone = self.zones[i][j]
-                zone.upper_left_node = nodes[i][j]
-                zone.upper_right_node = nodes[i][j+1]
-                zone.down_left_node = nodes[i+1][j]
-                zone.down_right_node = nodes[i+1][j+1]
+                zone.upper_left_node = self.nodes[i][j]
+                zone.upper_right_node = self.nodes[i][j+1]
+                zone.down_left_node = self.nodes[i+1][j]
+                zone.down_right_node = self.nodes[i+1][j+1]
                 if j == 0:
-                    self.edge_list.append(Edge(nodes[i][j], nodes[i+1][j], None, self.zones[i][j]))
+                    self.edge_list.append(Edge(self.nodes[i][j], self.nodes[i+1][j], None, self.zones[i][j]))
                 else:
-                    self.edge_list.append(Edge(nodes[i][j], nodes[i+1][j], self.zones[i][j-1], self.zones[i][j]))
+                    self.edge_list.append(Edge(self.nodes[i][j], self.nodes[i+1][j], self.zones[i][j-1], self.zones[i][j]))
                 if i == 0:
-                    self.edge_list.append(Edge(nodes[i][j], nodes[i][j+1], None, self.zones[i][j]))
+                    self.edge_list.append(Edge(self.nodes[i][j], self.nodes[i][j+1], None, self.zones[i][j]))
                 else:
-                    self.edge_list.append(Edge(nodes[i][j], nodes[i][j+1], self.zones[i-1][j], self.zones[i][j]))
-            self.edge_list.append(Edge(nodes[i][self.columns], nodes[i+1][self.columns], self.zones[i][self.columns-1], None))
+                    self.edge_list.append(Edge(self.nodes[i][j], self.nodes[i][j+1], self.zones[i-1][j], self.zones[i][j]))
+            self.edge_list.append(Edge(self.nodes[i][self.columns], self.nodes[i+1][self.columns], self.zones[i][self.columns-1], None))
         for j in range(self.columns):
-            self.edge_list.append(Edge(nodes[self.rows][j], nodes[self.rows][j+1], self.zones[self.rows-1][j], None))
+            self.edge_list.append(Edge(self.nodes[self.rows][j], self.nodes[self.rows][j+1], self.zones[self.rows-1][j], None))
 
         # Now setting the node lists, unoptimal method and will improve later
         e: Edge
         n: Node
         nOther: Node
-        for nodeList in nodes:
+        for nodeList in self.nodes:
             for n in nodeList:
                 for e in self.edge_list:
                     if n == e.node1 or n == e.node2:
@@ -133,6 +208,125 @@ class Map:
                             n.down_edge = e
                         elif nOther.y-n.y == -1:
                             n.up_edge = e
+        n: Node
+        e: Edge
+        
+        #final loop to set the node adgacency
+        for nodeList in self.nodes:
+            for n in nodeList:
+                if n.has_right_edge():
+                    e = n.right_edge
+                    if e.node1 == n:
+                        n.right_node = e.node2
+                    else:
+                        n.right_node = e.node1
+                    n.cardinals[Cardinal.RIGHT] = Node.CardinalConnection(n.right_node, n.right_edge)
+                if n.has_lower_edge():
+                    e = n.down_edge
+                    if e.node1 == n:
+                        n.lower_node = e.node2
+                    else:
+                        n.lower_node = e.node1
+                    n.cardinals[Cardinal.DOWN] = Node.CardinalConnection(n.lower_node, n.down_edge)
+                if n.has_left_edge():
+                    e = n.left_edge
+                    if e.node1 == n:
+                        n.left_node = e.node2
+                    else:
+                        n.left_node = e.node1
+                    n.cardinals[Cardinal.LEFT] = Node.CardinalConnection(n.left_node, n.left_edge)
+                if n.has_upper_edge():
+                    e = n.up_edge
+                    if e.node1 == n:
+                        n.upper_node = e.node2
+                    else:
+                        n.upper_node = e.node1
+                    n.cardinals[Cardinal.UP] = Node.CardinalConnection(n.upper_node, n.up_edge)
+        zone: Zone
+        #final loop to set the node diagonal adgacency
+        for nodeList in self.nodes:
+            for n in nodeList:
+                if n.has_upper_right_edge():
+                    zone = self.get_diag_zone(n, Diagonal.UP_RIGHT)
+                    if zone is not None:
+                        n.upper_right_node = zone.upper_right_node
+
+                        n.diags[Diagonal.UP_RIGHT] = Node.DiagonalConnection(n.upper_right_node,   
+                            # f = finish, s = start
+                            # n -e01- f
+                            # |       |
+                            # e00     e11
+                            # |       |
+                            # s -e10- n
+                            e00 = zone.down_left_node.up_edge, 
+                            e01 = zone.upper_left_node.right_edge, 
+                            e10  = zone.down_left_node.right_edge, 
+                            e11 = zone.down_right_node.up_edge)
+                if n.has_lower_right_edge():
+                    zone = self.get_diag_zone(n, Diagonal.DOWN_RIGHT)
+                    if zone is not None:
+                        n.lower_right_node = zone.down_right_node
+                        n.diags[Diagonal.DOWN_RIGHT] = Node.DiagonalConnection(n.lower_right_node,
+                            # s -e00- n
+                            # |       |
+                            # e10     e01
+                            # |       |
+                            # n -e11- f
+                            e00 = zone.upper_left_node.right_edge, 
+                            e01 = zone.upper_right_node.down_edge, 
+                            e10 = zone.upper_left_node.down_edge, 
+                            e11 = zone.down_left_node.right_edge)
+                if n.has_lower_left_edge():
+                    zone = self.get_diag_zone(n, Diagonal.DOWN_LEFT)
+                    if zone is not None:
+                        n.lower_left_node = zone.down_left_node
+                        n.diags[Diagonal.DOWN_LEFT] = Node.DiagonalConnection(n.lower_left_node,
+                            # n -e00- s
+                            # |       |
+                            # e01     e10
+                            # |       |
+                            # f -e11- n
+                            e00 = zone.upper_right_node.left_edge,
+                            e01 = zone.upper_left_node.down_edge,
+                            e10 = zone.upper_right_node.down_edge,
+                            e11 = zone.down_right_node.left_edge)
+                if n.has_upper_left_edge():
+                    zone = self.get_diag_zone(n, Diagonal.UP_LEFT)
+                    if zone is not None:
+                        n.upper_left_node = zone.upper_left_node
+                        n.diags[Diagonal.UP_LEFT] = Node.DiagonalConnection(n.upper_left_node, 
+                             # f -e11- n
+                             # |       |
+                             # e01     e10
+                             # |       |
+                             # n -e00- s
+                            e00 = zone.down_right_node.up_edge,
+                            e01 = zone.upper_right_node.left_edge,
+                            e10 = zone.down_right_node.left_edge,
+                            e11 = zone.down_left_node.up_edge)
+
+
+
+                
+
+
+    @staticmethod
+    def generate_random_map(columns: int, rows: int):
+        data = list()
+        random.seed()
+        for i in range(rows):
+            data.append(list())
+            for j in range(columns):
+                switcher = {
+                    0: 'q',
+                    1: 'v',
+                    2: 'p',
+                    3: 'e'
+                    }
+                r = random.randrange(0, 4)
+                data[i].append(switcher.get(r))
+        return Map(rows, columns, data)
+
 
     def get_diag_zone(self, node: Node, diag: Diagonal):
         x = node.x
@@ -143,15 +337,15 @@ class Map:
             Diagonal.UP_LEFT: -1,
             Diagonal.UP_RIGHT: 0
             }
-        x += switcher1.get(diag)
+        x += int(switcher1.get(diag))
         switcher2 ={
             Diagonal.DOWN_LEFT: 0,
             Diagonal.DOWN_RIGHT: 0,
             Diagonal.UP_LEFT: -1,
             Diagonal.UP_RIGHT: -1
             }
-        y += switcher2.get(diag)
-        if y >= 0 and y<= self.rows and x >= 0 and x <= self.columns:
+        y += int(switcher2.get(diag))
+        if y >= 0 and y< self.rows and x >= 0 and x < self.columns:
             return self.zones[y][x]
         else:
             return None
