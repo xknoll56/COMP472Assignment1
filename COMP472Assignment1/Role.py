@@ -29,6 +29,7 @@ class Role():
         cost = float(0)
         z1 = edge.side_zone_1
         z2 = edge.side_zone_2
+
         if z1 is not None and z2 is not None:
             cost = 0.5 * (self.cost_switch.get(z1.zone_type) + self.cost_switch.get(z2.zone_type))
         elif z1 is None:

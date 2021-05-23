@@ -21,7 +21,7 @@ class RoleV(Role):
 
         #caclulate the heuristic values of the start node
         cur.g_value = 0.0
-        cur.f_value = self.get_heuristic_estimate(cur, targ)
+        cur.f_value = self.get_heuristic(cur, targ)
         self.priority_queue_push(cur, cur.f_value)
 
         #Begin iterating throught he openlist
@@ -34,6 +34,7 @@ class RoleV(Role):
             if cur == targ:
                 print("Found target")
                 break
+            
 
             #iterate through the diagonals 
             diag: Node.DiagonalConnection 
@@ -42,10 +43,10 @@ class RoleV(Role):
                 tentative_g = self.get_diag_cost(diag)+cur.g_value
                 #if tentative g score is less then the current g score then reparent the node and recalculate its 
                 #g and f scores, if its not on the open list add it
-                if tentative_g < diag.node.g_value:
+                if tentative_g < diag.node.g_value and n.q_limit>0:
                     n.prevNode = cur
                     n.g_value = tentative_g
-                    n.f_value = n.g_value+self.get_heuristic_estimate(n, targ)
+                    n.f_value = n.g_value+self.get_heuristic(n, targ)
                     if n not in self.openList:
                         self.priority_queue_push(n, n.f_value)
 
@@ -57,8 +58,8 @@ class RoleV(Role):
                 if tentative_g < n.g_value:
                     n.prevNode = cur
                     n.g_value = tentative_g
-                    n.f_value = n.g_value+self.get_heuristic_estimate(n, targ)
-                    if n not in self.openList:
+                    n.f_value = n.g_value+self.get_heuristic(n, targ)
+                    if n not in self.openList and n.q_limit>0:
                         self.priority_queue_push(n, n.f_value)
 
         #the path is constructed by starting at the goal and appending all the previious nodes until the start node is added
@@ -68,7 +69,32 @@ class RoleV(Role):
             cur = cur.prevNode
             self.path.insert(0, cur)
 
-    def get_heuristic_estimate(self, cur_node: Node, targ_node: Node):
+    def get_heuristic(self, start: Node, targ: Node):
+        cur1: Node = start
+        head: Node = start
+        cost: float = self.get_heuristic_direct(start, targ)
+        #distance to goal horizontally
+        dx = targ.x-start.x
+        #distance to goal vertically
+        dy = targ.y-start.y
+        for i in range(abs(dy)):
+            for j in range(abs(dx)):
+                cost = min(cost, self.get_heuristic_direct(start, cur1)+self.get_heuristic_direct(cur1, targ))
+                if dx > 0:
+                    cur1 = cur1.right_node
+                else:
+                    cur1 = cur1.left_node
+                if j == abs(dx)-1:
+                    if dy > 0:
+                        head = head.lower_node
+                    else:
+                        head = head.upper_node
+                    cur1 = head
+        return cost
+
+
+
+    def get_heuristic_direct(self, cur_node: Node, targ_node: Node):
         temp_node = cur_node
         cost: float = 0.0
         #loop while the temp node is not the target
@@ -107,6 +133,8 @@ class RoleV(Role):
             elif dx >0 and dy <0:
                 cost += self.get_diag_cost(temp_node.diags[Diagonal.UP_RIGHT])
                 temp_node = temp_node.upper_right_node
+            
+
         return cost
 
 

@@ -1,0 +1,13 @@
+10 12
+e e q v p p e p p e 
+p p q v v q v e e v 
+v p v p e e p e v q 
+q q q p q v q e p e 
+v v p e v e q q p e 
+v e p e e p e v p v 
+e p q v q p e q e p 
+q v v p e v v p q e 
+e v q v e q e v p v 
+q v v q v v q p e e 
+v q q p p e p v e e 
+e p q v e q q e e p 

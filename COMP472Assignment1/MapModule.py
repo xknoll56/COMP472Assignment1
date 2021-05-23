@@ -84,6 +84,8 @@ class Node():
         self.g_value: float = float('inf')
         self.f_value: float = float('inf')
 
+        self.q_limit = 15
+
     
 
     #cardinals will be checked by all the patients
