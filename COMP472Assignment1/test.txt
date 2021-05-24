@@ -1,13 +1,21 @@
-10 12
-e e q v p p e p p e 
-p p q v v q v e e v 
-v p v p e e p e v q 
-q q q p q v q e p e 
-v v p e v e q q p e 
-v e p e e p e v p v 
-e p q v q p e q e p 
-q v v p e v v p q e 
-e v q v e q e v p v 
-q v v q v v q p e e 
-v q q p p e p v e e 
-e p q v e q q e e p 
+18 20
+p e e p v q e v e e q p v q p v v q 
+p v v p v q v p q p p e v v q v e q 
+v q e p e p p q e v e e q q v p q e 
+q v q p e e e p p q e v p v v q q v 
+q p p q q q e p e p q p v v e v q p 
+v v e q v q v q e q p e e p e q v v 
+p p e e q v v v v e q p p v q q q p 
+q q q p p p q p v q v p e p p e e e 
+p q e v q q p p v v p p p e v p e q 
+p v v p q v v e q v q e q v v v p e 
+v q p v q q e v q q v v q v v v v v 
+p v q p v q v v p v v p v e e e q v 
+q v p p v p e v p v e q e p p v v p 
+q p q p v q q p v q e q q q v q p v 
+v q q e e e p v p v q v q q e v e v 
+v p p v p p v e e q q e v q p e p v 
+q p q p v p q p v q e p q p p p e v 
+e e v e p q e p q p e p q p e v p p 
+p p q v v v e q p v v v v p v v q v 
+q e v e p v v e e e p e v v q v q p 

@@ -70,26 +70,27 @@ class RoleV(Role):
             self.path.insert(0, cur)
 
     def get_heuristic(self, start: Node, targ: Node):
-        cur1: Node = start
         head: Node = start
         cost: float = self.get_heuristic_direct(start, targ)
         #distance to goal horizontally
         dx = targ.x-start.x
         #distance to goal vertically
         dy = targ.y-start.y
+
         for i in range(abs(dy)):
-            for j in range(abs(dx)):
-                cost = min(cost, self.get_heuristic_direct(start, cur1)+self.get_heuristic_direct(cur1, targ))
-                if dx > 0:
-                    cur1 = cur1.right_node
-                else:
-                    cur1 = cur1.left_node
-                if j == abs(dx)-1:
-                    if dy > 0:
-                        head = head.lower_node
-                    else:
-                        head = head.upper_node
-                    cur1 = head
+            cost = min(cost, self.get_heuristic_direct(start, head)+self.get_heuristic_direct(head, targ))
+            if dy > 0:
+                head = head.lower_node
+            else:
+                head = head.upper_node
+        head = start
+        for i in range(abs(dx)):
+            cost = min(cost, self.get_heuristic_direct(start, head) + self.get_heuristic_direct(head, targ))
+            if dx > 0:
+                head = head.right_node
+            else:
+                head = head.left_node
+
         return cost
 
 
@@ -104,36 +105,24 @@ class RoleV(Role):
             #distance to goal vertically
             dy = targ_node.y-temp_node.y
 
-            #If the goal is vertically algined, move only vertically
-            if dx == 0:
-                if dy > 0:
-                    cost += self.get_cost_cardinal(temp_node.down_edge)
-                    temp_node = temp_node.lower_node
-                elif dy < 0:
-                    cost += self.get_cost_cardinal(temp_node.up_edge)
-                    temp_node = temp_node.upper_node
-            #If the goal is horizontally alligned, move only horizontally
-            elif dy == 0:
-                if dx > 0:
-                    cost += self.get_cost_cardinal(temp_node.right_edge)
-                    temp_node = temp_node.right_node
-                elif dx<0:
-                    cost += self.get_cost_cardinal(temp_node.left_edge)
-                    temp_node = temp_node.left_node
-            #Otherwise move diagonally until its horizontally/vertically alligned
-            elif dx > 0 and dy > 0:
-                cost += self.get_diag_cost(temp_node.diags[Diagonal.DOWN_RIGHT])
-                temp_node = temp_node.lower_right_node
-            elif dx < 0 and dy > 0:
-                cost += self.get_diag_cost(temp_node.diags[Diagonal.DOWN_LEFT])
-                temp_node = temp_node.lower_left_node
-            elif dx < 0 and dy < 0:
-                cost += self.get_diag_cost(temp_node.diags[Diagonal.UP_LEFT])
-                temp_node = temp_node.upper_left_node
-            elif dx >0 and dy <0:
-                cost += self.get_diag_cost(temp_node.diags[Diagonal.UP_RIGHT])
-                temp_node = temp_node.upper_right_node
-            
+            #normalize the direction
+            v: list[int] = [dx, dy]
+            if abs(dx) > 0:
+                v[0] = int(v[0]/abs(v[0]))
+            if abs(dy) > 0:
+                v[1] = int(v[1]/abs(v[1]))
+
+            dir = self.dir_switch.get(tuple(v))
+
+            if isinstance(dir, Cardinal):
+                card: Node.CardinalConnection = temp_node.cardinals[dir]
+                cost += self.get_cost_cardinal(card.edge)
+                temp_node = self.node_switch.get(v)(temp_node)
+
+            if isinstance(dir, Diagonal):
+                diag: Node.DiagonalConnection = temp_node.diags[dir]
+                cost += self.get_diag_cost(diag)
+                temp_node = self.node_switch.get(v)(temp_node)
 
         return cost
 
