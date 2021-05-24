@@ -112,7 +112,8 @@ class RoleV(Role):
             if abs(dy) > 0:
                 v[1] = int(v[1]/abs(v[1]))
 
-            dir = self.dir_switch.get(tuple(v))
+            v = tuple(v)
+            dir = self.dir_switch.get(v)
 
             if isinstance(dir, Cardinal):
                 card: Node.CardinalConnection = temp_node.cardinals[dir]
