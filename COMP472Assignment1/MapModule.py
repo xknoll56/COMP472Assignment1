@@ -141,6 +141,11 @@ class Zone():
         #Down Left Node
         self.down_left_node: Node = down_left_node
 
+        self.upper_zone: Zone = None
+        self.right_zone: Zone = None
+        self.lower_zone: Zone = None
+        self.left_zone: Zone = None
+
 class Map:
     # q = quarentine place, v = vaccinated place, p = playground, e = empty
     def __init__(self, rows: int = 3, columns: int = 4, grid_data =  [['q', 'v', 'p', 'e'],['v', 'e', 'q', 'e'], ['p', 'q', 'v', 'v']]):
@@ -306,6 +311,20 @@ class Map:
                             e01 = zone.upper_right_node.left_edge,
                             e10 = zone.down_right_node.left_edge,
                             e11 = zone.down_left_node.up_edge)
+        zone:Zone
+        #Finally need to set the zone adgacency for the role P
+        for i in range(rows):
+            for j in range(columns):
+                zone = self.zones[i][j]
+                if i > 0:
+                    zone.upper_zone = self.zones[i-1][j]
+                if j > 0:
+                    zone.left_zone = self.zones[i][j-1]
+                if i < rows-1:
+                    zone.lower_zone = self.zones[i+1][j]
+                if j < columns-1:
+                    zone.right_zone = self.zones[i][j+1]
+
 
 
 

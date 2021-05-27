@@ -3,3 +3,6 @@
 COMP472Assignment1.sln
 COMP472Assignment1/COMP472Assignment1.pyproj
 COMP472Assignment1/__pycache__/*
+*.pyc
+COMP472Assignment1/__pycache__/MapModule.cpython-39.pyc
+COMP472Assignment1/__pycache__/MapModule.cpython-39.pyc
