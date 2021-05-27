@@ -8,6 +8,6 @@ COMP472Assignment1/__pycache__/Role.cpython-39.pyc
 COMP472Assignment1/__pycache__/RoleV.cpython-39.pyc
 COMP472Assignment1/__pycache__/VaccinatedRole.cpython-39.pyc
 
-.idea/
-venv/
-ENV/
+.idea/*
+venv/*
+ENV/*
