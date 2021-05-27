@@ -354,6 +354,17 @@ class Map:
 
     def __str__(self):
         s:str = str()
+        zone: Zone
+        for i in range(len(self.zones)):
+            for j in range(len(self.zones[i])):
+                zone = self.zones[i][j]
+                s += "("+str(zone.upper_left_node.x)+","+str(zone.upper_left_node.y)+")\t\t"
+            s += "("+str(zone.upper_right_node.x)+","+str(zone.upper_right_node.y)+")\n\t"
+            for j in range(len(self.zones[i])):
+                zone = self.zones[i][j]
+                s += zone.zone_type+"\t\t"
+        return s
+
 
 
 

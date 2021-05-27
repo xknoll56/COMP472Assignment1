@@ -71,25 +71,48 @@ class RoleV(Role):
 
     def get_heuristic(self, start: Node, targ: Node):
         head: Node = start
+        head2: Node = start
         cost: float = self.get_heuristic_direct(start, targ)
         #distance to goal horizontally
         dx = targ.x-start.x
         #distance to goal vertically
         dy = targ.y-start.y
 
-        for i in range(abs(dy)):
-            cost = min(cost, self.get_heuristic_direct(start, head)+self.get_heuristic_direct(head, targ))
-            if dy > 0:
-                head = head.lower_node
-            else:
-                head = head.upper_node
-        head = start
-        for i in range(abs(dx)):
-            cost = min(cost, self.get_heuristic_direct(start, head) + self.get_heuristic_direct(head, targ))
-            if dx > 0:
-                head = head.right_node
-            else:
-                head = head.left_node
+        if abs(dy) > 4:
+            for i in range(abs(dy)):
+                cost = min(cost, self.get_heuristic_direct(start, head)+self.get_heuristic_direct(head, targ))
+                if dy > 0:
+                    head = head.lower_node
+                else:
+                    head = head.upper_node
+        else:
+            for i in range(abs(4)):
+                cost = min(cost, self.get_heuristic_direct(start, head)+self.get_heuristic_direct(head, targ))
+                cost = min(cost, self.get_heuristic_direct(start, head2)+self.get_heuristic_direct(head2, targ))
+                if head.has_lower_edge():
+                    head = head.lower_node
+                if head2.has_upper_edge():
+                    head2 = head2.upper_node
+
+        if abs(dx) > 4:
+            head = start
+            for i in range(abs(dx)):
+                cost = min(cost, self.get_heuristic_direct(start, head) + self.get_heuristic_direct(head, targ))
+                if dx > 0:
+                    head = head.right_node
+                else:
+                    head = head.left_node
+        else:
+            head = start
+            head2 = start
+            for i in range(4):
+                cost = min(cost, self.get_heuristic_direct(start, head)+self.get_heuristic_direct(head, targ))
+                cost = min(cost, self.get_heuristic_direct(start, head2)+self.get_heuristic_direct(head2, targ))
+                if head.has_right_edge():
+                    head = head.right_node
+                if head2.has_left_edge():
+                    head2 = head2.left_node
+
 
         return cost
 
@@ -119,8 +142,7 @@ class RoleV(Role):
                 card: Node.CardinalConnection = temp_node.cardinals[dir]
                 cost += self.get_cost_cardinal(card.edge)
                 temp_node = self.node_switch.get(v)(temp_node)
-
-            if isinstance(dir, Diagonal):
+            elif isinstance(dir, Diagonal):
                 diag: Node.DiagonalConnection = temp_node.diags[dir]
                 cost += self.get_diag_cost(diag)
                 temp_node = self.node_switch.get(v)(temp_node)

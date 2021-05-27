@@ -95,7 +95,8 @@ def draw_map(map: Map, v: Role):
             if event.type == pygame.QUIT: 
                 print("Quiting application")
                 pygame.quit()
-                sys.exit()
+                running = 0
+                sys.exit(running)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
