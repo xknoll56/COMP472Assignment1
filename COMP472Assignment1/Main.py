@@ -33,9 +33,9 @@ def write_to_file(path: str, map: Map):
 
 
 def main():
-   # mat = np.array(np.array())
-    #map = Map.generate_random_map(18, 20)
-    #write_to_file("test.txt", map)
+    #mat = np.array(np.array())
+    map = Map.generate_random_map(8, 8)
+    write_to_file("test.txt", map)
     map = load_from_file("test.txt")
     #map = Map()
     v = RoleV(map)
