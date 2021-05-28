@@ -1,9 +1,4 @@
-8 8
-v q e v p q p p 
-p e v q v q v p 
-q p q e q v e q 
-q q q v e p v p 
-v e q p q e e v 
-p e q e q q p v 
-q e p q v p p v 
-p p e p q q e q 
+4 3
+q v p e 
+v e q e 
+p q v v 

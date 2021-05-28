@@ -38,14 +38,14 @@ def main():
     write_to_file("test.txt", map)
     map = load_from_file("test.txt")
     #map = Map()
-    v = RoleV(map)
+    v = RoleP(map)
     bot_left: Zone = map.zones[0][map.columns-1]
     top_right: Zone = map.zones[map.rows-1][0]
 
     start = time.time()
-    v.generate_path(bot_left, top_right)
+    v.generate_path(map.zones[0][0], map.zones[0][1])  # TODO end points are chosen by the user.
     print("Time taken: "+str(time.time()-start))
-    print(v.path[len(v.path)-1].g_value)
+    # print(v.path[len(v.path)-1].g_value)
     print(map)
     zone: Zone
     end_locations: list[Zone] = list()
@@ -58,6 +58,12 @@ def main():
     for loc in end_locations:
         print(str(loc.x)+","+str(loc.y))
     draw_map(map, v)
+
+# Test main function
+def main():
+    map = load_from_file("test.txt")
+    v = RoleP(map)
+    print(v.get_heuristic(map.zones[1][1].upper_left_node, map.zones[2][3].down_right_node))
 
 main()
 
