@@ -80,7 +80,6 @@ def draw_map(map: Map, v: Role):
     ticksLastFrame = 0
     elapsed = 0.0
     #path = [map.zones[0][0].upper_left_node]
-    n: Node = path[1]
     while running:      
        # screen.blit(text,(0, 0))
         try:
