@@ -12,6 +12,83 @@ class RoleV(Role):
             'e': 2}
         super().__init__(map, cost_switch)
 
+    def generate_closest_path(self, start_zone: Zone):
+
+        #Establish the final and start nodes taken as the bottom left nodes of the entered zones
+        start: Node = start_zone.down_left_node
+        cur: Node = start
+        zone: Zone
+
+        #First we identify the target as the closest vaccination zone
+        min_dist: int = self.map.columns+self.map.rows+2
+        targ: Zone
+        for zone_arr in self.map.zones:
+            for zone in zone_arr:
+                if zone.zone_type == 'v' and zone is not start:
+                    dist = abs(start.x-zone.x)+abs(start.y-zone.y)
+                    if dist < min_dist:
+                        min_dist = dist
+                        targ = zone
+        targ: Node = targ.down_left_node
+
+        #caclulate the heuristic values of the start node
+        cur.g_value = 0.0
+        cur.f_value = self.get_closest_heuristic(cur, targ)
+        self.priority_queue_push(cur, cur.f_value)
+
+        #Begin iterating throught he openlist
+        while len(self.openList)>0:
+
+            #take the current as the node with the lowest F value
+            cur = self.priority_queue_pop()
+
+            #if the current is the target then the algorithm is complete
+            if cur == targ:
+                print("Found target")
+                break
+            
+
+            #iterate through the diagonals 
+            diag: Node.DiagonalConnection 
+            for diag in cur.diags.values():
+                n:Node = diag.node
+                tentative_g = self.get_diag_cost(diag)+cur.g_value
+                #if tentative g score is less then the current g score then reparent the node and recalculate its 
+                #g and f scores, if its not on the open list add it
+                if tentative_g < diag.node.g_value and n.q_limit>0:
+                    n.prevNode = cur
+                    n.g_value = tentative_g
+                    n.f_value = n.g_value+self.get_closest_heuristic(n, targ)
+                    if n not in self.openList:
+                        self.priority_queue_push(n, n.f_value)
+
+            #iterate through the cardinals 
+            card: Node.CardinalConnection
+            for card in cur.cardinals.values():
+                n:Node = card.node
+                tentative_g = self.get_cost_cardinal(card.edge)+cur.g_value
+                if tentative_g < n.g_value:
+                    n.prevNode = cur
+                    n.g_value = tentative_g
+                    n.f_value = n.g_value+self.get_closest_heuristic(n, targ)
+                    if n not in self.openList and n.q_limit>0:
+                        self.priority_queue_push(n, n.f_value)
+
+        #the path is constructed by starting at the goal and appending all the previious nodes until the start node is added
+        self.path = []
+        self.path.insert(0, cur)
+        while cur != start:
+            cur = cur.prevNode
+            self.path.insert(0, cur)
+
+    def get_closest_heuristic(self, start: Node, targ: Node):
+        #distance to goal horizontally
+        dx = targ.x-start.x
+        #distance to goal vertically
+        dy = targ.y-start.y
+        return math.sqrt(dx*dx + dy*dy)
+
+
     def generate_path(self, start_zone: Zone, end_zone: Zone):
 
         #Establish the final and start nodes taken as the bottom left nodes of the entered zones
