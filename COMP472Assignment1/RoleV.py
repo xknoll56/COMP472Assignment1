@@ -25,17 +25,6 @@ class RoleV(Role):
         cur: Node = start
         zone: Zone
 
-        #First we identify the target as the closest vaccination zone
-        min_dist: int = self.map.columns+self.map.rows+2
-        targ: Zone
-        for zone_arr in self.map.zones:
-            for zone in zone_arr:
-                if zone.zone_type == 'v' and zone is not start:
-                    dist = abs(start.x-zone.x)+abs(start.y-zone.y)
-                    if dist < min_dist:
-                        min_dist = dist
-                        targ = zone
-        targ: Node = targ.down_left_node
 
         #caclulate the heuristic values of the start node
         cur.g_value = 0.0
@@ -49,7 +38,7 @@ class RoleV(Role):
             cur = self.priority_queue_pop()
 
             #if the current is the target then the algorithm is complete
-            if self.get_closest_heuristic(cur) == 0:
+            if self.get_closest_heuristic(cur) == 0 and self.map.get_diag_zone(cur, Diagonal.UP_RIGHT).zone_type == 'v':
                 print("Found target")
                 break
             
@@ -91,9 +80,12 @@ class RoleV(Role):
 
 
     def get_closest_heuristic(self, start: Node):
+        root_2 = math.sqrt(2)
         closest_dest: Node
         min_dist: float = self.map.columns+self.map.rows+2
         node: Node
+        min_dx: int
+        min_dy: int
         for node in self.destinations:
             #distance to node horizontally
             dx = node.x-start.x
@@ -101,9 +93,45 @@ class RoleV(Role):
             dy = node.y-start.y
             dist = math.sqrt(dx*dx + dy*dy)
             if dist < min_dist:
+                min_dx = dx
+                min_dy = dy
                 min_dist = dist
                 closest_dest = node
-        return min_dist
+        heuristic: float
+        if min_dx < 0 and min_dy > 0:
+            diag: Node.DiagonalConnection = closest_dest.diags[Diagonal.UP_RIGHT]
+            amount_saved_diag: float = max(root_2 - self.get_diag_cost(diag), 0)
+            if (-1*min_dx) > min_dy:
+                amount_saved_hor: float = max(1 - self.get_cost_cardinal(closest_dest.right_edge), 0)
+                amount_saved: float = max(amount_saved_diag, amount_saved_hor)
+                heuristic = (min_dy+min_dx)+(min_dy)*root_2-amount_saved
+            else:
+                amount_saved_vert: float = max(1 - self.get_cost_cardinal(closest_dest.up_edge), 0)
+                amount_saved: float = max(amount_saved_diag, amount_saved_vert)
+                heuristic = (min_dx+min_dy)+(-1*min_dx)*root_2-amount_saved
+        elif min_dx < 0 and min_dy < 0:
+            if min_dx < min_dy:
+                amount_saved: float = max(1 - self.get_cost_cardinal(closest_dest.right_edge), 0)
+                heuristic = (min_dy-min_dx) + (-1*min_dy)*root_2-amount_saved
+            else:
+                heuristic = (min_dx-min_dy) + (-1*min_dx)*root_2
+        elif min_dx > 0 and min_dy > 0:
+            if min_dy > min_dy:
+                amount_saved: float = max(1 - self.get_cost_cardinal(closest_dest.up_edge), 0)
+                heuristic = (min_dy-min_dx)+min_dx*root_2-amount_saved
+            else:
+                heuristic = (min_dx-min_dy)+min_dy*root_2
+        elif min_dx > 0 and min_dy < 0:
+            max_dir = max(min_dx, -1*min_dy)
+            min_dir = min(min_dx, -1*min_dy)
+            heuristic = (max_dir-min_dir)+min_dir*root_2
+        else:
+            if min_dx == 0:
+                heuristic = abs(min_dy)
+            else:
+                heuristic = abs(min_dx)
+
+        return heuristic
 
 
 

@@ -34,29 +34,19 @@ def write_to_file(path: str, map: Map):
 
 def main():
     #mat = np.array(np.array())
-   # map = Map.generate_random_map(8, 8)
+    map = Map.generate_random_map(19, 25, 'v', 20)
     #write_to_file("test.txt", map)
-    map = load_from_file("test.txt")
+    #map = load_from_file("test.txt")
     #map = Map()
     v = RoleV(map)
     bot_left: Zone = map.zones[0][map.columns-1]
     top_right: Zone = map.zones[map.rows-1][0]
 
     start = time.time()
-    v.generate_closest_path(map.zones[3][3])  # TODO end points are chosen by the user.
+    v.generate_closest_path(map.zones[map.rows//2][map.columns//2])  # TODO end points are chosen by the user.
     print("Time taken: "+str(time.time()-start))
     # print(v.path[len(v.path)-1].g_value)
     print(map)
-    zone: Zone
-    end_locations: list[Zone] = list()
-    for zones in map.zones:
-        for zone in zones:
-            if zone.zone_type == 'v':
-                end_locations.append(zone)
-    
-    print("Here are ")
-    for loc in end_locations:
-        print(str(loc.x)+","+str(loc.y))
     draw_map(map, v)
 
 # Test main function

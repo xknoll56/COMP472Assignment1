@@ -332,9 +332,12 @@ class Map:
 
 
     @staticmethod
-    def generate_random_map(columns: int, rows: int):
+    def generate_random_map(columns: int, rows: int, max_type = None, max_amount = None):
         data = list()
         random.seed()
+        max_type_locs = list()
+        for i in range(max_amount):
+            max_type_locs.append((random.randrange(0, rows-1), random.randrange(0, columns-1)))
         for i in range(rows):
             data.append(list())
             for j in range(columns):
@@ -345,7 +348,14 @@ class Map:
                     3: 'e'
                     }
                 r = random.randrange(0, 4)
-                data[i].append(switcher.get(r))
+                c = switcher.get(r)
+                if max_type is not None:                    
+                    while c is max_type:
+                        r = random.randrange(0, 4)
+                        c = switcher.get(r)
+                data[i].append(c)
+        for index in max_type_locs:
+            data[index[0]][index[1]] = max_type
         return Map(rows, columns, data)
 
 
