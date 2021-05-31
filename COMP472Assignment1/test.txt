@@ -1,9 +1,9 @@
 8 8
-q e e q e p e p 
+v e e v e p e v 
 p q p q p p e e 
-p e e e q q e e 
-p q e v p e p e 
-p p e q q e p p 
-q e e p q e q e 
+p q q q q q e e 
+p q q p e e p v 
+v q q e p e p p 
+q q e p q e q e 
 q q e e q q e q 
-p e p p e e p q 
+v e p e v e p v 

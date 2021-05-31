@@ -11,6 +11,12 @@ class RoleV(Role):
             'p': 1,
             'e': 2}
         super().__init__(map, cost_switch)
+        self.destinations: list[Node] = list()
+        zone:Zone
+        for zone_arr in self.map.zones:
+            for zone in zone_arr:
+                if zone.zone_type == 'v':
+                    self.destinations.append(zone.down_left_node)
 
     def generate_closest_path(self, start_zone: Zone):
 
@@ -33,7 +39,7 @@ class RoleV(Role):
 
         #caclulate the heuristic values of the start node
         cur.g_value = 0.0
-        cur.f_value = self.get_closest_heuristic(cur, targ)
+        cur.f_value = self.get_closest_heuristic(cur)
         self.priority_queue_push(cur, cur.f_value)
 
         #Begin iterating throught he openlist
@@ -43,7 +49,7 @@ class RoleV(Role):
             cur = self.priority_queue_pop()
 
             #if the current is the target then the algorithm is complete
-            if cur == targ:
+            if self.get_closest_heuristic(cur) == 0:
                 print("Found target")
                 break
             
@@ -58,7 +64,7 @@ class RoleV(Role):
                 if tentative_g < diag.node.g_value and n.q_limit>0:
                     n.prevNode = cur
                     n.g_value = tentative_g
-                    n.f_value = n.g_value+self.get_closest_heuristic(n, targ)
+                    n.f_value = n.g_value+self.get_closest_heuristic(n)
                     if n not in self.openList:
                         self.priority_queue_push(n, n.f_value)
 
@@ -70,7 +76,7 @@ class RoleV(Role):
                 if tentative_g < n.g_value:
                     n.prevNode = cur
                     n.g_value = tentative_g
-                    n.f_value = n.g_value+self.get_closest_heuristic(n, targ)
+                    n.f_value = n.g_value+self.get_closest_heuristic(n)
                     if n not in self.openList and n.q_limit>0:
                         self.priority_queue_push(n, n.f_value)
 
@@ -81,12 +87,24 @@ class RoleV(Role):
             cur = cur.prevNode
             self.path.insert(0, cur)
 
-    def get_closest_heuristic(self, start: Node, targ: Node):
-        #distance to goal horizontally
-        dx = targ.x-start.x
-        #distance to goal vertically
-        dy = targ.y-start.y
-        return math.sqrt(dx*dx + dy*dy)
+
+
+
+    def get_closest_heuristic(self, start: Node):
+        closest_dest: Node
+        min_dist: float = self.map.columns+self.map.rows+2
+        node: Node
+        for node in self.destinations:
+            #distance to node horizontally
+            dx = node.x-start.x
+            #distance to node vertically
+            dy = node.y-start.y
+            dist = math.sqrt(dx*dx + dy*dy)
+            if dist < min_dist:
+                min_dist = dist
+                closest_dest = node
+        return min_dist
+
 
 
     def generate_path(self, start_zone: Zone, end_zone: Zone):
