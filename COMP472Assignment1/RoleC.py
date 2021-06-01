@@ -52,6 +52,76 @@ class RoleC(Role):
 		if len(self.openList) == 0:
 			print("No path to goal")
 
+	def generate_path_closest(self, start_zone: Zone):
+
+		travel_cost: float = 0.0
+
+		# search for nearest node
+		start: Node = start_zone.upper_right_node
+		cur: Node = start
+		targ: Node = self.find_closest_goal(start)
+
+		# set initial values
+		cur.g_value = 0.0
+		cur.f_value = self.get_heuristic_recursive(cur, targ)
+		self.priority_queue_push(cur, cur.f_value)
+
+		# algorithm start
+		while len(self.openList) > 0:
+			# set cur to node with lowest f_value
+			cur = self.priority_queue_pop()
+
+			# if cur is the goal node the algorithm exits
+			if cur == targ:
+				print("Target Node Reached")
+				self.construct_path(start, cur)
+				break
+
+			# generate neighbours
+			card: Node.CardinalConnection
+
+			for card in cur.cardinals.values():
+				n: Node = card.node
+				# calculate g_value of neighbour
+				tentative_g = cur.g_value + self.get_cost_cardinal(card.edge) + travel_cost
+				# compare tentative_g to current g_value of node
+				if tentative_g < n.g_value:
+					n.prevNode = cur
+					n.g_value = tentative_g
+					n.f_value = n.g_value + self.get_heuristic_recursive(n, targ)
+					if n not in self.openList:
+						self.priority_queue_push(n, n.f_value)
+
+		if len(self.openList) == 0:
+			print("No path to goal")
+
+	def find_closest_goal(self, start_node: Node):
+
+		targ_node: Node = None
+		distance: float = math.inf
+
+		for zone_array in self.map.zones:
+			for zone in zone_array:
+				# check if zone is of goal type
+				if zone.zone_type == 'q':
+					# calculate distance between start and node
+					temp_targ = zone.upper_right_node
+
+					dx = temp_targ.x - start_node.x
+					dy = temp_targ.y - start_node.y
+
+					temp_distance = math.sqrt(dx ** 2 + dy ** 2)
+					
+					# if shorter distance, update target
+					if(temp_distance < distance):
+						targ_node = temp_targ
+						distance = temp_distance
+		if targ_node == None:
+			print("No target node found")
+
+		return targ_node
+
+
 	def construct_path(self, start: Node, cur: Node):
 		self.path = []
 		self.path.insert(0, cur)
