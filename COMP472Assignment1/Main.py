@@ -34,11 +34,11 @@ def write_to_file(path: str, map: Map):
 
 def main():
     #mat = np.array(np.array())
-    map = Map.generate_random_map(19, 25, 'q', 10)
-    #write_to_file("test.txt", map)
-    #map = load_from_file("test.txt")
+    # map = Map.generate_random_map(8, 8, "p", 8)
+    # write_to_file("test.txt", map)
+    map = load_from_file("test.txt")
     #map = Map()
-    v = RoleC(map)
+    v = RoleP(map)
     bot_left: Zone = map.zones[0][map.columns-1]
     top_right: Zone = map.zones[map.rows-1][0]
 
