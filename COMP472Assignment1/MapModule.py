@@ -83,6 +83,7 @@ class Node():
 
         self.g_value: float = float('inf')
         self.f_value: float = float('inf')
+        self.h_value: float = None
 
         self.q_limit = 15
 
@@ -141,10 +142,7 @@ class Zone():
         #Down Left Node
         self.down_left_node: Node = down_left_node
 
-        self.upper_zone: Zone = None
-        self.right_zone: Zone = None
-        self.lower_zone: Zone = None
-        self.left_zone: Zone = None
+        self.neighboring_zones: list[Zone] = list()
 
 class Map:
     # q = quarentine place, v = vaccinated place, p = playground, e = empty
@@ -317,13 +315,13 @@ class Map:
             for j in range(columns):
                 zone = self.zones[i][j]
                 if i > 0:
-                    zone.upper_zone = self.zones[i-1][j]
+                    zone.neighboring_zones.append(self.zones[i-1][j])
                 if j > 0:
-                    zone.left_zone = self.zones[i][j-1]
+                    zone.neighboring_zones.append(self.zones[i][j-1])
                 if i < rows-1:
-                    zone.lower_zone = self.zones[i+1][j]
+                    zone.neighboring_zones.append(self.zones[i+1][j])
                 if j < columns-1:
-                    zone.right_zone = self.zones[i][j+1]
+                    zone.neighboring_zones.append(self.zones[i][j+1])
 
 
 
