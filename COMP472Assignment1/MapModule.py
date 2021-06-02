@@ -83,6 +83,7 @@ class Node():
 
         self.g_value: float = float('inf')
         self.f_value: float = float('inf')
+        self.h_value: float = None
 
         self.q_limit = 15
 
