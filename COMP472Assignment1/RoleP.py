@@ -31,16 +31,33 @@ class RoleP(Role):
 
         if isinstance(start, Zone):
             print("it's a zone.")
+            h = float("inf")  # TODO make 'h' a member of node.
             self.start = start
-            start = start.upper_right_node
-
-        cur = start
-        h = float("inf")  # TODO make 'h' a member of node.
-
-        # calculate the heuristic values of the start node
-        cur.g_value = 0.0
-        cur.f_value = self.get_heuristic(cur)
-        self.priority_queue_push(cur, cur.f_value)
+            for zone in start.neighboring_zones:
+                if zone.zone_type == "p":
+                    self.end = zone
+                    return
+            node = start.upper_left_node
+            node.g_value = min(self.get_cost_cardinal(node.down_edge), self.get_cost_cardinal(node.right_edge))
+            node.f_value = node.g_value + self.get_heuristic(node)
+            self.priority_queue_push(node, node.f_value)
+            node = start.upper_right_node
+            node.g_value = min(self.get_cost_cardinal(node.down_edge), self.get_cost_cardinal(node.left_edge))
+            node.f_value = node.g_value + self.get_heuristic(node)
+            self.priority_queue_push(node, node.f_value)
+            node = start.down_left_node
+            node.g_value = min(self.get_cost_cardinal(node.up_edge), self.get_cost_cardinal(node.right_edge))
+            node.f_value = node.g_value + self.get_heuristic(node)
+            self.priority_queue_push(node, node.f_value)
+            node = start.down_right_node
+            node.g_value = min(self.get_cost_cardinal(node.up_edge), self.get_cost_cardinal(node.left_edge))
+            node.f_value = node.g_value + self.get_heuristic(node)
+            self.priority_queue_push(node, node.f_value)
+        else:
+            # calculate the heuristic values of the start node
+            start.g_value = 0.0
+            start.f_value = self.get_heuristic(start)
+            self.priority_queue_push(start, start.f_value)
 
         # Begin iterating through the openlist
         while len(self.openList) > 0:
@@ -72,9 +89,12 @@ class RoleP(Role):
             # the path is constructed by starting at the goal and appending all the previious nodes until the start node is added
             self.path = []
             self.path.insert(0, cur)
-            while cur != start:
+            while cur is not None:
                 cur = cur.prevNode
-                self.path.insert(0, cur)
+                if cur is None:
+                    break
+                else:
+                    self.path.insert(0, cur)
 
     def get_heuristic(self, start):
         min_dist = float("inf")
