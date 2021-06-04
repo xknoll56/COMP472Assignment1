@@ -385,6 +385,7 @@ class Map:
 				zone = self.zones[i][j]
 				s += zone.zone_type+"\t\t"
 		return s
+
 	@staticmethod
 	def generate_defined_map(rows: int, cols: int, num_q: int = 1, num_v: int = 1, num_p: int = 1):
 		print("Generating Defined Map of Size: " + str(rows) + " x " + str(cols))
@@ -409,8 +410,8 @@ class Map:
 			while zone_placed == False:
 
 				# Generate random coordinates
-				zone_row = random.randrange(0, rows - 1)
-				zone_col = random.randrange(0, cols - 1)
+				zone_row = random.randrange(0, rows)
+				zone_col = random.randrange(0, cols)
 
 				# Check if zone is empty
 				if data[zone_row][zone_col] == 'e':

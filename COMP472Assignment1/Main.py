@@ -120,7 +120,7 @@ def main_final():
 	zone_num = int(input("Enter starting zone: "))
 
 	zone_row = math.floor(zone_num / map_cols)
-	zone_col = (zone_num - 1) % map_rows
+	zone_col = (zone_num) % map_rows
 
 	zone: Zone = map.zones[zone_row][zone_col]
 
