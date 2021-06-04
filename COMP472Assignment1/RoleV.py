@@ -18,7 +18,7 @@ class RoleV(Role):
                 if zone.zone_type == 'v':
                     self.destinations.append(zone.down_left_node)
 
-    def generate_closest_path(self, start_zone: Zone):
+    def generate_path_closest(self, start_zone: Zone):
 
         #Establish the final and start nodes taken as the bottom left nodes of the entered zones
         start: Node = start_zone.down_left_node
