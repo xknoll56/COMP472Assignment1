@@ -12,13 +12,13 @@ from RoleC import *
 COMMANDS = queue.Queue()
 running = 1
 
-class Input(threading.Thread):
-    def run(self):
-        while running:
-            command = input()
-            COMMANDS.put(command)
-INPUT: Input = Input()
-INPUT.start()
+#class Input(threading.Thread):
+#    def run(self):
+#        while running:
+#            command = input()
+#            COMMANDS.put(command)
+#INPUT: Input = Input()
+#INPUT.start()
 
 
 def draw_map(map: Map, v: Role):
@@ -82,12 +82,12 @@ def draw_map(map: Map, v: Role):
     #path = [map.zones[0][0].upper_left_node]
     while running:      
        # screen.blit(text,(0, 0))
-        try:
-            command = COMMANDS.get(False)
-        except queue.Empty:
-            command = None
-        if command:
-            print("Printing command: "+command)
+        #try:
+        #    command = COMMANDS.get(False)
+        #except queue.Empty:
+        #    command = None
+        #if command:
+        #    print("Printing command: "+command)
 
         pygame.display.flip()
         for event in pygame.event.get():

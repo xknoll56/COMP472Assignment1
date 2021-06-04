@@ -92,7 +92,6 @@ def main_final():
 	# User Input for Max Dimensions
 	map_rows = int(input("Enter desired map rows: "))
 	map_cols = int(input("Enter desired map cols: "))
-
 	max_zones = map_rows * map_cols
 
 	# User Input for Zone Amounts
