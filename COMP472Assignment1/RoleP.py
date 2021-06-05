@@ -1,5 +1,8 @@
+# Role P is implemented by Jordan Goulet - 40075688
+
 from Role import *
 
+# Travels to the closest Playground.
 class RoleP(Role):
 
     def __init__(self, map: Map):
@@ -9,9 +12,10 @@ class RoleP(Role):
             'p': 0,
             'e': 1}
         super().__init__(map, cost_switch)
-        self.start = None
-        self.end = None
-        self.destinations: list[Node] = list()
+        self.start = None  # The starting zone if any.
+        self.end = None  # The end zone if any.
+        self.first_edge = None  # The first edge traveled to from a starting zone if any.
+        self.destinations: list[Node] = list()  # list of nodes that are possible destinations
         # Add all possible destination nodes to the list.
         for zone_arr in self.map.zones:
             for zone in zone_arr:
@@ -29,135 +33,123 @@ class RoleP(Role):
 
     def generate_path_closest(self, start):
 
+        # If the starting point is a zone
         if isinstance(start, Zone):
-            print("it's a zone.")
-            h = float("inf")  # TODO make 'h' a member of node.
             self.start = start
+
+            # Check if a neighbor of the starting zone is a playground.
+            # If so, the best path is straight to it.
             for zone in start.neighboring_zones:
                 if zone.zone_type == "p":
                     self.end = zone
                     return
+
+            # if no neighboring zones are playgrounds, then the path must move to an edge, then a node.
+            # calculates the g and f values for each of the four corner nodes and pushes the nodes in the open list.
+            top_edge = self.get_cost_cardinal(start.upper_left_node.right_edge)
+            right_edge = self.get_cost_cardinal(start.down_right_node.up_edge)
+            down_edge = self.get_cost_cardinal(start.down_right_node.left_edge)
+            left_edge = self.get_cost_cardinal(start.upper_left_node.down_edge)
             node = start.upper_left_node
-            node.g_value = min(self.get_cost_cardinal(node.down_edge), self.get_cost_cardinal(node.right_edge))
+            node.g_value = min(left_edge, top_edge)
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
             node = start.upper_right_node
-            node.g_value = min(self.get_cost_cardinal(node.down_edge), self.get_cost_cardinal(node.left_edge))
+            node.g_value = min(right_edge, top_edge)
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
             node = start.down_left_node
-            node.g_value = min(self.get_cost_cardinal(node.up_edge), self.get_cost_cardinal(node.right_edge))
+            node.g_value = min(left_edge, down_edge)
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
             node = start.down_right_node
-            node.g_value = min(self.get_cost_cardinal(node.up_edge), self.get_cost_cardinal(node.left_edge))
+            node.g_value = min(right_edge, down_edge)
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
+
+        # If the starting point is a node
         else:
-            # calculate the heuristic values of the start node
+            # calculate the g and f values of the start node and push it in the open list.
             start.g_value = 0.0
             start.f_value = self.get_heuristic(start)
             self.priority_queue_push(start, start.f_value)
 
-        # Begin iterating through the openlist
+        # Begin iterating through the open list.
         while len(self.openList) > 0:
 
             # take the current as the node with the lowest F value
             cur = self.priority_queue_pop()
 
+            # if its heuristic is 0, we must be at a playground (the target), built the path.
             if self.get_heuristic(cur) <= 0:
                 print("Found target")
-                break
+                # the path is constructed by appending all the previous nodes until the start node.
+                self.path = []
+                self.path.insert(0, cur)
+                while cur is not None:
+                    cur = cur.prevNode
+                    if cur is None:
+                        break
+                    else:
+                        self.path.insert(0, cur)
+
+                # if the path started in a zone, find which edge was travelled to first.
+                if self.start is not None:
+                    if start.upper_left_node == self.path[0]:
+                        if left_edge > top_edge:
+                            self.first_edge = left_edge
+                        else:
+                            self.first_edge = top_edge
+                    elif start.upper_right_node == self.path[0]:
+                        if right_edge > top_edge:
+                            self.first_edge = right_edge
+                        else:
+                            self.first_edge = top_edge
+                    elif start.down_left_node == self.path[0]:
+                        if left_edge > down_edge:
+                            self.first_edge = left_edge
+                        else:
+                            self.first_edge = down_edge
+                    elif start.down_right_node == self.path[0]:
+                        if right_edge > down_edge:
+                            self.first_edge = right_edge
+                        else:
+                            self.first_edge = down_edge
+                    else:
+                        # this should be unreachable
+                        print("ERROR. couldn't calculate the first edge.")
+                return
 
             # iterate through the cardinals
             for card in cur.cardinals.values():
-                n: Node = card.node
+                n = card.node
                 tentative_g = self.get_cost_cardinal(card.edge) + cur.g_value
+                # if the new path leading to the node has a lower cost, this should become its g value.
                 if tentative_g < n.g_value:
                     n.prevNode = cur
                     n.g_value = tentative_g
-                    h = self.get_heuristic(n)
-                    n.f_value = n.g_value + h
+                    n.f_value = n.g_value + self.get_heuristic(n)
                     if n not in self.openList and n.q_limit > 0:
                         self.priority_queue_push(n, n.f_value)
 
+        # The open list is empty, no path was found.
+        print("No path is found. Please try again!")
+        print("This means that there is no possible path from the starting point "
+              "to a playground that does pass through an infinity cost edge.")
 
-        if (self.get_heuristic(cur) > 0):
-            # TODO no path possible
-            print("There is no possible path from the starting point to the end point that does not travel along a quarantine zone.")
-        else:
-            # the path is constructed by starting at the goal and appending all the previious nodes until the start node is added
-            self.path = []
-            self.path.insert(0, cur)
-            while cur is not None:
-                cur = cur.prevNode
-                if cur is None:
-                    break
-                else:
-                    self.path.insert(0, cur)
-
+    # Calculates (if not already calculated previously) and returns the h value for the given node.
+    # The heuristic value is the manhattan distance to the closest playground.
+    # This heuristic is admissible because the manhatthan distance to the closest playground cannot be an over estimate
+    # since that would mean one of the edges traveled has cost less than 1 and this in turn would mean that one of the
+    # two zones adjacent to this edge is a playground, meaning that the original manhattan distance calculated was not
+    # in fact the closest playground. Thus this heuristic function cannot be an over estimate of the actual cost.
     def get_heuristic(self, start):
-        min_dist = float("inf")
-        for node in self.destinations:
-            dist = abs(node.x - start.x) + abs(node.y - start.y)
-            if dist < min_dist:
-                min_dist = dist
-        return min_dist
-
-    # finds the cost of the Best-First Search solution path directly towards target.
-    # def best_first_search(self, orig: Node, targ: Node):
-    #     print("---")
-    #     # the cost of the lowest cost direct transition towards target.
-    #     cost = float("inf")
-    #     # the node with the lowest cost of the lowest cost direct transition towards target.
-    #     best = None
-    #     # distance to goal horizontally
-    #     dx = targ.x - orig.x
-    #     # distance to goal vertically
-    #     dy = targ.y - orig.y
-    #     print("dx=" + str(dx) + ", dy=" + str(dy))
-    #     if dx > 0:  # the target is to the right of the current node
-    #         print("target is to the right")
-    #         edge_cost = self.get_cost_cardinal(orig.right_edge)
-    #         print("the edge's cost is: " + str(edge_cost))
-    #         if edge_cost < cost:  # this transition is more cost effective than current best.
-    #             cost = edge_cost
-    #             best = orig.right_node
-    #
-    #     if dx < 0:  # the target is to the left of the current node
-    #         print("target is to the left")
-    #         edge_cost = self.get_cost_cardinal(orig.left_edge)
-    #         print("the edge's cost is: " + str(edge_cost))
-    #         if edge_cost < cost:  # this transition is more cost effective than current best.
-    #             cost = edge_cost
-    #             best = orig.left_node
-    #
-    #     if dy > 0:  # the target is to the bottom of the current node
-    #         print("target is to the bottom")
-    #         edge_cost = self.get_cost_cardinal(orig.down_edge)
-    #         print("the edge's cost is: " + str(edge_cost))
-    #         if edge_cost < cost:  # this transition is more cost effective than current best.
-    #             cost = edge_cost
-    #             best = orig.lower_node
-    #
-    #     if dy < 0:  # the target is to the top of the current node
-    #         print("target is to the top")
-    #         edge_cost = self.get_cost_cardinal(orig.up_edge)
-    #         print("the edge's cost is: " + str(edge_cost))
-    #         if edge_cost < cost:  # this transition is more cost effective than current best.
-    #             cost = edge_cost
-    #             best = orig.upper_node
-    #
-    #     if cost == float("inf"):
-    #         return cost
-    #     if best is None:
-    #         return 0  # origin is target
-    #     else:
-    #         return cost + self.best_first_search(best, targ)
-    #
-    # def get_heuristic(self, start, targ):
-    #     # the total cost of traversing the Best-First Search solution path directly towards target.
-    #     print("Initiating heuristic function for Role P with nodes: (" + str(start.x) + ", " + str(start.y) + "), (" + str(targ.x) + ", " + str(targ.y) + ")")
-    #     return self.best_first_search(start, targ)
-
-
+        # The h value for this node hasnt been calculated yet, calculate it.
+        if start.h_value is None:
+            min_dist = float("inf")
+            for node in self.destinations:
+                dist = abs(node.x - start.x) + abs(node.y - start.y)
+                if dist < min_dist:
+                    min_dist = dist
+            start.h_value = min_dist
+        return start.h_value
