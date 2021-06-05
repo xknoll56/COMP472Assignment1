@@ -129,6 +129,8 @@ def draw_map(map: Map, v: Role):
         #Draw the background
         if not drawn:
             screen.fill((200 , 200, 200))
+            if v.path_cost is not None:
+                screen.blit(font.render("Path cost: "+str(v.path_cost), True, (0, 0, 0)), (0,0))
             i: int = 0
             j: int = 0
             for rectList in zoneRects:

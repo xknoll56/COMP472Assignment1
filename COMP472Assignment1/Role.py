@@ -13,6 +13,7 @@ class Role():
         self.map = map
         self.counter = 0
         self.cost_switch = cost_switch
+        self.path_cost: float = None
 
         self.dir_switch = {
             (1,0): Cardinal.RIGHT,

@@ -43,7 +43,7 @@ class RoleV(Role):
             #if the current is the target then the algorithm is complete
             if self.get_closest_heuristic(cur) == 0 and self.map.get_diag_zone(cur, Diagonal.UP_RIGHT).zone_type == 'v':
                 print("Found target")
-                print("Total Cost: " + str(cur.g_value))
+                self.path_cost = cur.g_value
                 break
             
 
