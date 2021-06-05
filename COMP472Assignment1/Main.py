@@ -108,7 +108,7 @@ def main_final():
 		
 		# Generate Map
 		map: Map = Map.generate_defined_map(map_rows, map_cols, num_q, num_v, num_p)
-		write_to_file("demo_p.txt", map)
+		#write_to_file("demo_p.txt", map)
 		# Prompt user for Role
 		role_switch = {
 			1: RoleC,

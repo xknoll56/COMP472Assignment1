@@ -36,6 +36,8 @@ def draw_map(map: Map, v: Role):
     blue = (0, 0, 255)
     red = (255,0,0)
     green = (0, 255, 0)
+    start_color = (255,255,0)
+    end_color = (255,0,255)
     size = (WIDTH - 2 * BORDER) / map.columns
     
     playground = pygame.image.load("playground.jpg")
@@ -152,18 +154,6 @@ def draw_map(map: Map, v: Role):
             ticksLastFrame = pygame.time.get_ticks()
             drawn = 1
 
-        t = pygame.time.get_ticks()
-        deltaTime = (t - ticksLastFrame)/1000.0
-        elapsed += deltaTime*2.0
-        ticksLastFrame = t
-        if elapsed < len(path)-1:
-            n = path[int(elapsed)+1]
-            center1 = nodeCenter[coord_to_index(n.x, n.y)]
-            center2 = nodeCenter[coord_to_index(n.prevNode.x, n.prevNode.y)]
-            #pygame.draw.circle(screen, red, lerp(center2[0], center2[1], center1[0], center1[1], elapsed-int(elapsed)), 0.02*size)
-        if elapsed > len(path):
-            drawn = 0
-            elapsed = 0.0
 
         
 
