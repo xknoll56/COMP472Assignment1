@@ -101,24 +101,24 @@ class RoleP(Role):
                 if self.start is not None:
                     if start.upper_left_node == self.path[0]:
                         if left_edge > top_edge:
-                            self.first_edge = left_edge
+                            self.first_edge = start.upper_left_node.down_edge
                         else:
-                            self.first_edge = top_edge
+                            self.first_edge = start.upper_left_node.right_edge
                     elif start.upper_right_node == self.path[0]:
                         if right_edge > top_edge:
-                            self.first_edge = right_edge
+                            self.first_edge = start.down_right_node.up_edge
                         else:
-                            self.first_edge = top_edge
+                            self.first_edge = start.upper_left_node.right_edge
                     elif start.down_left_node == self.path[0]:
                         if left_edge > down_edge:
-                            self.first_edge = left_edge
+                            self.first_edge = start.upper_left_node.down_edge
                         else:
-                            self.first_edge = down_edge
+                            self.first_edge = start.down_right_node.left_edge
                     elif start.down_right_node == self.path[0]:
                         if right_edge > down_edge:
-                            self.first_edge = right_edge
+                            self.first_edge = start.down_right_node.up_edge
                         else:
-                            self.first_edge = down_edge
+                            self.first_edge = start.down_right_node.left_edge
                     else:
                         # this should be unreachable
                         print("ERROR. couldn't calculate the first edge.")

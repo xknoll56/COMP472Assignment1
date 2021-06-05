@@ -80,6 +80,19 @@ def draw_map(map: Map, v: Role):
     ticksLastFrame = 0
     elapsed = 0.0
     #path = [map.zones[0][0].upper_left_node]
+    role_p_start_point = None
+    role_p_first_edge_mid_point = None
+    if isinstance(v, RoleP):
+        if v.first_edge is not None:
+            center1 = nodeCenter[coord_to_index(v.start.upper_left_node.x, v.start.upper_left_node.y)]
+            center2 = nodeCenter[coord_to_index(v.start.upper_right_node.x, v.start.upper_right_node.y)]
+            center3 = nodeCenter[coord_to_index(v.start.down_left_node.x, v.start.down_left_node.y)]
+            center4 = nodeCenter[coord_to_index(v.start.down_right_node.x, v.start.down_right_node.y)]
+            role_p_start_point = ((center1[0]+center2[0]+center3[0]+center4[0])/4.0, (center1[1]+center2[1]+center3[1]+center4[1])/4.0)
+            first_edge: Edge = v.first_edge
+            center1 = nodeCenter[coord_to_index(first_edge.node1.x, first_edge.node1.y)]
+            center2 = nodeCenter[coord_to_index(first_edge.node2.x, first_edge.node2.y)]
+            role_p_first_edge_mid_point = ((center1[0]+center2[0])/2.0, (center1[1]+center2[1])/2.0)
     while running:      
        # screen.blit(text,(0, 0))
         #try:
@@ -125,6 +138,9 @@ def draw_map(map: Map, v: Role):
                 pygame.draw.circle(screen, blue, nodeCenter[i], 0.04*size)
                 #if i > 0:
                     #pygame.draw.line(screen, green, nodeCenter[i-1], nodeCenter[i])
+            if role_p_start_point is not None:
+                pygame.draw.line(screen, blue, role_p_start_point,role_p_first_edge_mid_point, int(0.04*size))
+                pygame.draw.line(screen, blue, role_p_first_edge_mid_point, nodeCenter[coord_to_index(path[0].x, path[0].y)], int(0.04*size))
             skip = 1
             for n in path:
                 if not skip:
