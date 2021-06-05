@@ -36,8 +36,8 @@ def draw_map(map: Map, v: Role):
     blue = (0, 0, 255)
     red = (255,0,0)
     green = (0, 255, 0)
-    start_color = (255,255,0)
-    end_color = (255,0,255)
+    start_color = (255,128,0)
+    end_color = (170,102,255)
     size = (WIDTH - 2 * BORDER) / map.columns
     
     playground = pygame.image.load("playground.jpg")
@@ -84,17 +84,25 @@ def draw_map(map: Map, v: Role):
     #path = [map.zones[0][0].upper_left_node]
     role_p_start_point = None
     role_p_first_edge_mid_point = None
+    role_p_end_point = None
     if isinstance(v, RoleP):
-        if v.first_edge is not None:
+        if v.start is not None:
             center1 = nodeCenter[coord_to_index(v.start.upper_left_node.x, v.start.upper_left_node.y)]
             center2 = nodeCenter[coord_to_index(v.start.upper_right_node.x, v.start.upper_right_node.y)]
             center3 = nodeCenter[coord_to_index(v.start.down_left_node.x, v.start.down_left_node.y)]
             center4 = nodeCenter[coord_to_index(v.start.down_right_node.x, v.start.down_right_node.y)]
             role_p_start_point = ((center1[0]+center2[0]+center3[0]+center4[0])/4.0, (center1[1]+center2[1]+center3[1]+center4[1])/4.0)
+        if v.first_edge is not None:
             first_edge: Edge = v.first_edge
             center1 = nodeCenter[coord_to_index(first_edge.node1.x, first_edge.node1.y)]
             center2 = nodeCenter[coord_to_index(first_edge.node2.x, first_edge.node2.y)]
             role_p_first_edge_mid_point = ((center1[0]+center2[0])/2.0, (center1[1]+center2[1])/2.0)
+        if v.end is not None:
+            center1 = nodeCenter[coord_to_index(v.end.upper_left_node.x, v.end.upper_left_node.y)]
+            center2 = nodeCenter[coord_to_index(v.end.upper_right_node.x, v.end.upper_right_node.y)]
+            center3 = nodeCenter[coord_to_index(v.end.down_left_node.x, v.end.down_left_node.y)]
+            center4 = nodeCenter[coord_to_index(v.end.down_right_node.x, v.end.down_right_node.y)]
+            role_p_end_point = ((center1[0]+center2[0]+center3[0]+center4[0])/4.0, (center1[1]+center2[1]+center3[1]+center4[1])/4.0)
     while running:      
        # screen.blit(text,(0, 0))
         #try:
@@ -140,17 +148,27 @@ def draw_map(map: Map, v: Role):
                 pygame.draw.circle(screen, blue, nodeCenter[i], 0.04*size)
                 #if i > 0:
                     #pygame.draw.line(screen, green, nodeCenter[i-1], nodeCenter[i])
-            if role_p_start_point is not None:
+            if role_p_end_point is None:
+                skip = 1
+                for n in path:
+                    if not skip:
+                        center1 = nodeCenter[coord_to_index(n.x, n.y)]
+                        center2 = nodeCenter[coord_to_index(n.prevNode.x, n.prevNode.y)]
+                        pygame.draw.line(screen, blue, center1, center2, int(0.04*size))
+                    skip  = 0
+            else:
+                pygame.draw.line(screen, blue, role_p_start_point, role_p_end_point, int(0.04*size))
+                pygame.draw.circle(screen, start_color, role_p_start_point, 0.15*size)
+                pygame.draw.circle(screen, end_color, role_p_end_point, 0.15*size)
+            if role_p_start_point is not None and role_p_end_point is None:
                 pygame.draw.line(screen, blue, role_p_start_point,role_p_first_edge_mid_point, int(0.04*size))
                 pygame.draw.line(screen, blue, role_p_first_edge_mid_point, nodeCenter[coord_to_index(path[0].x, path[0].y)], int(0.04*size))
-            skip = 1
-            for n in path:
-                if not skip:
-                    center1 = nodeCenter[coord_to_index(n.x, n.y)]
-                    center2 = nodeCenter[coord_to_index(n.prevNode.x, n.prevNode.y)]
-                    pygame.draw.line(screen, blue, center1, center2, int(0.04*size))
-                skip  = 0
-
+                pygame.draw.circle(screen, start_color, role_p_start_point, 0.15*size)
+                pygame.draw.circle(screen, end_color, nodeCenter[coord_to_index(path[len(path)-1].x, path[len(path)-1].y)], 0.15*size)
+            else:
+                if len(path)>0:
+                    pygame.draw.circle(screen, start_color, nodeCenter[coord_to_index(path[0].x, path[0].y)], 0.15*size)
+                    pygame.draw.circle(screen, end_color, nodeCenter[coord_to_index(path[len(path)-1].x, path[len(path)-1].y)], 0.15*size)
             ticksLastFrame = pygame.time.get_ticks()
             drawn = 1
 
