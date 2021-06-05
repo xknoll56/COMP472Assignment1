@@ -1,12 +1,13 @@
 COMP 472 - A1
 name - XXXXXXXX (Role C)
-name - XXXXXXXX (Role V)
+Xavier Knoll - 40132134 (Role V)
 Jordan Goulet - 40075688 (Role P)
 
 Summary:
 This program calculates the path with the least cost from the chosen starting point to the closest possible destination.
 
 App Flow:
+0. The user is asked to generate a map, or load a demo map based on a role chosen.
 1. The user is prompted to enter the desired number of rows and columns.
 2. The user is prompted to enter the desired number of each type of zones (the remainder are set the the empty zone type).
 3. A map is randomly generated according to the parameters provided by the user.

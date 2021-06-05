@@ -1,0 +1,16 @@
+15 15
+p v e p v e e e e e e e p e e 
+p v p v v v e e v p e e e v p 
+v v e p p p e v p p v v p e e 
+p e e e v e v e v e p e e v v 
+p v e v v e e e v e e p v v e 
+e v p p v v v v p e e p p p p 
+e e p p e p v v p e p p q v e 
+p e p p p e e p p e e p p v p 
+v e e e v p p p e v p v p p e 
+e v p p p e e p v p v v v e e 
+p v p p v p p e e v v e e e e 
+v p e v p e p q p p p v p v e 
+e v e e q e v v e v v v e v p 
+p e p v v v v v v e e v e e e 
+q e e v v p e p v p e v e e v 

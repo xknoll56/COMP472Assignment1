@@ -391,7 +391,7 @@ class Map:
 		print("Generating Defined Map of Size: " + str(rows) + " x " + str(cols))
 
 		# Create empty map list
-		data = [['e'] * rows for _ in range(cols)]
+		data = [['e'] * cols for _ in range(rows)]
 
 		# Zone Flag
 		zone_placed: bool = False

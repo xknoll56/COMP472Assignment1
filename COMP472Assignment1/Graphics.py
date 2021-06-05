@@ -100,8 +100,6 @@ def draw_map(map: Map, v: Role):
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     running = 0
-                    INPUT.join()
-                    INPUT.signal
                     sys.exit(running)
 
 

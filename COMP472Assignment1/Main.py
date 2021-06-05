@@ -89,37 +89,57 @@ def main():
 def main_final():
 	print("COMP472 - Assignment 1 - Covid Map Simulation")
 
-	# User Input for Max Dimensions
-	map_rows = int(input("Enter desired map rows: "))
-	map_cols = int(input("Enter desired map cols: "))
-	max_zones = map_rows * map_cols
+	map: Map
+	role: Role
+	zone_num: int
+	choice: int = int(input("Enter 1 to generate a map, or 2 to load a demo map: "))
+	if choice is 1:
+		# User Input for Max Dimensions
+		map_rows = int(input("Enter desired map rows: "))
+		map_cols = int(input("Enter desired map cols: "))
+		max_zones = map_rows * map_cols
 
-	# User Input for Zone Amounts
-	num_q = int(input("Enter number of Quarantine Zones (Max: " + str(max_zones) + "): "))
-	max_zones -= num_q
-	num_v = int(input("Enter number of Vaccines Zones (Max: " + str(max_zones) + "): "))
-	max_zones -= num_v
-	num_p = int(input("Enter number of Playground Zones (Max: " + str(max_zones) + "): "))
-	
-	# Generate Map
-	map: Map = Map.generate_defined_map(map_rows, map_cols, num_q, num_v, num_p)
-
-	# Prompt user for Role
-	role_switch = {
-		1: RoleC,
-		2: RoleV,
-		3: RoleP
-		}
-	role = role_switch.get(int(input("Enter Desired Role (1: RoleC, 2: RoleV, 3: RoleP): ")))
-	role = role(map)
+		# User Input for Zone Amounts
+		num_q = int(input("Enter number of Quarantine Zones (Max: " + str(max_zones) + "): "))
+		max_zones -= num_q
+		num_v = int(input("Enter number of Vaccines Zones (Max: " + str(max_zones) + "): "))
+		max_zones -= num_v
+		num_p = int(input("Enter number of Playground Zones (Max: " + str(max_zones) + "): "))
+		
+		# Generate Map
+		map: Map = Map.generate_defined_map(map_rows, map_cols, num_q, num_v, num_p)
+		write_to_file("demo_p.txt", map)
+		# Prompt user for Role
+		role_switch = {
+			1: RoleC,
+			2: RoleV,
+			3: RoleP
+			}
+		role = role_switch.get(int(input("Enter Desired Role (1: RoleC, 2: RoleV, 3: RoleP): ")))
+		role = role(map)
+		# Prompt user for starting zone
+		zone_num = int(input("Enter starting zone: "))
+	elif choice is 2:
+		choice = int(input("Enter Desired Role (1: RoleC, 2: RoleV, 3: RoleP): "))
+		if choice is 1:
+			map = load_from_file("demo_c.txt")
+			role = RoleC(map)
+			zone_num = 0
+		elif choice is 2:
+			map = load_from_file("demo_v.txt")
+			role = RoleV(map)
+			zone_num = 0
+		elif choice is 3:
+			map = load_from_file("demo_p.txt")
+			role = RoleP(map)
+			zone_num = 0
 
 	# TODO: Print text map
-	draw_map_guide(map_rows, map_cols)
-	# Prompt user for starting zone
-	zone_num = int(input("Enter starting zone: "))
+	draw_map_guide(map.rows, map.columns)
 
-	zone_row = math.floor(zone_num / map_cols)
-	zone_col = (zone_num) % map_rows
+
+	zone_row = math.floor(zone_num / map.columns)
+	zone_col = (zone_num) % map.rows
 
 	zone: Zone = map.zones[zone_row][zone_col]
 
