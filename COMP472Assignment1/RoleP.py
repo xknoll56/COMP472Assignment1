@@ -36,12 +36,15 @@ class RoleP(Role):
         # If the starting point is a zone
         if isinstance(start, Zone):
             self.start = start
+            start_q = self.cost_switch.get(start.zone_type)  # cost of leaving start zone
 
             # Check if a neighbor of the starting zone is a playground.
             # If so, the best path is straight to it.
             for zone in start.neighboring_zones:
                 if zone.zone_type == "p":
                     self.end = zone
+                    # The cost of moving from X zone to P zone is the cost of moving in X zone.
+                    print("Total Cost: " + str(start_q))
                     return
 
             # if no neighboring zones are playgrounds, then the path must move to an edge, then a node.
@@ -51,19 +54,19 @@ class RoleP(Role):
             down_edge = self.get_cost_cardinal(start.down_right_node.left_edge)
             left_edge = self.get_cost_cardinal(start.upper_left_node.down_edge)
             node = start.upper_left_node
-            node.g_value = min(left_edge, top_edge)
+            node.g_value = min(left_edge, top_edge) + start_q
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
             node = start.upper_right_node
-            node.g_value = min(right_edge, top_edge)
+            node.g_value = min(right_edge, top_edge) + start_q
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
             node = start.down_left_node
-            node.g_value = min(left_edge, down_edge)
+            node.g_value = min(left_edge, down_edge) + start_q
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
             node = start.down_right_node
-            node.g_value = min(right_edge, down_edge)
+            node.g_value = min(right_edge, down_edge) + start_q
             node.f_value = node.g_value + self.get_heuristic(node)
             self.priority_queue_push(node, node.f_value)
 
@@ -83,6 +86,7 @@ class RoleP(Role):
             # if its heuristic is 0, we must be at a playground (the target), built the path.
             if self.get_heuristic(cur) <= 0:
                 print("Found target")
+                print("Total Cost: " + str(cur.g_value))
                 # the path is constructed by appending all the previous nodes until the start node.
                 self.path = []
                 self.path.insert(0, cur)
