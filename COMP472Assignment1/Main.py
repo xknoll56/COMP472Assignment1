@@ -93,7 +93,7 @@ def main_final():
 	role: Role
 	zone_num: int
 	choice: int = int(input("Enter 1 to generate a map, or 2 to load a demo map: "))
-	if choice is 1:
+	if choice == 1:
 		# User Input for Max Dimensions
 		map_rows = int(input("Enter desired map rows: "))
 		map_cols = int(input("Enter desired map cols: "))
@@ -119,17 +119,17 @@ def main_final():
 		role = role(map)
 		# Prompt user for starting zone
 		zone_num = int(input("Enter starting zone: "))
-	elif choice is 2:
+	elif choice == 2:
 		choice = int(input("Enter Desired Role (1: RoleC, 2: RoleV, 3: RoleP): "))
-		if choice is 1:
+		if choice == 1:
 			map = load_from_file("demo_c.txt")
 			role = RoleC(map)
 			zone_num = 0
-		elif choice is 2:
+		elif choice == 2:
 			map = load_from_file("demo_v.txt")
 			role = RoleV(map)
 			zone_num = 0
-		elif choice is 3:
+		elif choice == 3:
 			map = load_from_file("demo_p.txt")
 			role = RoleP(map)
 			zone_num = 0

@@ -44,7 +44,7 @@ class RoleP(Role):
                 if zone.zone_type == "p":
                     self.end = zone
                     # The cost of moving from X zone to P zone is the cost of moving in X zone.
-                    print("Total Cost: " + str(start_q))
+                    self.path_cost = start_q
                     return
 
             # if no neighboring zones are playgrounds, then the path must move to an edge, then a node.
@@ -86,7 +86,7 @@ class RoleP(Role):
             # if its heuristic is 0, we must be at a playground (the target), built the path.
             if self.get_heuristic(cur) <= 0:
                 print("Found target")
-                print("Total Cost: " + str(cur.g_value))
+                self.path_cost = cur.g_value
                 # the path is constructed by appending all the previous nodes until the start node.
                 self.path = []
                 self.path.insert(0, cur)
