@@ -1,7 +1,13 @@
 COMP 472 - A1
+
+We certify that this submission is the original work of members of the group and meets 
+the Faculty's Expectations of Originality
+
 Kevin McAllister - 40031326 (Role C)
 Xavier Knoll - 40132134 (Role V)
 Jordan Goulet - 40075688 (Role P)
+
+-June 6th 2021
 
 Summary:
 This program calculates the path with the least cost from the chosen starting point to the closest possible destination.
