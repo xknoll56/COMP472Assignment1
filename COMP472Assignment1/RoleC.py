@@ -1,3 +1,8 @@
+# ----------------------------------------------------------------------------------------------------
+#	RoleC Algorithm Class
+#	Author: Kevin McAllister (40031326)
+# ----------------------------------------------------------------------------------------------------
+
 from Role import *
 
 class RoleC(Role):
@@ -10,9 +15,12 @@ class RoleC(Role):
 			'e': 1}
 		super().__init__(map, cost_switch)
 
+	# Generates a path using A algorithm to a chosen destination
 	def generate_path(self, start_zone: Zone, end_zone: Zone):
 
+		# Variable travel cost to allow node counting
 		travel_cost: float = 0.0
+
 		# set initial nodes
 		start: Node = start_zone.upper_right_node
 		cur: Node = start
@@ -48,12 +56,15 @@ class RoleC(Role):
 					n.f_value = n.g_value + self.get_heuristic_recursive(n, targ)
 					if n not in self.openList:
 						self.priority_queue_push(n, n.f_value)
-
-		if len(self.openList) == 0:
+		
+		# If the while loop exits and targ is not found (and edge case where targ is the final element of openList)
+		if len(self.openList) == 0 and cur != targ:
 			print("No path to goal")
 
+	# Generates a path using A algorithm to nearest goal node
 	def generate_path_closest(self, start_zone: Zone):
 
+		# Variable travel cost to allow node counting
 		travel_cost: float = 0.0
 
 		# search for nearest node
@@ -91,15 +102,18 @@ class RoleC(Role):
 					n.f_value = n.g_value + self.get_heuristic_recursive(n, targ)
 					if n not in self.openList:
 						self.priority_queue_push(n, n.f_value)
-
-		if len(self.openList) == 0:
+		
+		# If the while loop exits and targ is not found (and edge case where targ is the final element of openList)
+		if len(self.openList) == 0 and cur != targ:
 			print("No path to goal")
-
+	
+	# Find the closest goal zone from all the possible goal zones in the map
 	def find_closest_goal(self, start_node: Node):
 
 		targ_node: Node = None
 		distance: float = math.inf
 
+		# iterate through the list of zones in the map structure
 		for zone_array in self.map.zones:
 			for zone in zone_array:
 				# check if zone is of goal type
@@ -116,12 +130,13 @@ class RoleC(Role):
 					if(temp_distance < distance):
 						targ_node = temp_targ
 						distance = temp_distance
+		# If there is no zone of the target (thus no target node)
 		if targ_node == None:
 			print("No target node found")
 
 		return targ_node
 
-
+	# creates path list once the generate_path algorithm finds the goal node
 	def construct_path(self, start: Node, cur: Node):
 		self.path = []
 		self.path.insert(0, cur)
@@ -129,8 +144,10 @@ class RoleC(Role):
 			cur = cur.prevNode
 			self.path.insert(0, cur)
 
-	# This heuristic function takes into account the number of nodes travelled (adds +1 each time a node is travelled)
+	# Recursive heuristic function to allow slight searching beyond the most direct path.
 	def get_heuristic_recursive(self, cur_node: Node, targ: Node, prev_node: Node = None, cost: float = 0.0):
+
+		# Variable travel cost to allow node counting
 		travel_cost: float = 0.0
 
 		if cur_node != targ:
@@ -215,6 +232,7 @@ class RoleC(Role):
 		# return when cur_node == targ
 		return cost
 
+	# Helper function for the recursive heuristic (to remove majority repetition in moves)
 	def cardinal_move(self, new_node: Node, cur_node: Node, prev_node: Node, targ_node: Node, travel_edge: Edge, cost: float):
 		# if the node to travel to is the one that the path came from, return infinity to prevent backtracking
 		if new_node == prev_node:
