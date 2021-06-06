@@ -1,5 +1,5 @@
 COMP 472 - A1
-name - XXXXXXXX (Role C)
+Kevin McAllister - 40031326 (Role C)
 Xavier Knoll - 40132134 (Role V)
 Jordan Goulet - 40075688 (Role P)
 
